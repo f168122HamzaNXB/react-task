@@ -98,9 +98,12 @@ function ShowStudent(){
     const StudentHandler = async () => {
         console.log(id);
         try{
+            const token = localStorage.getItem('token');
             let response = await fetch('http://localhost:8080/student/' + id, {
                 method: 'GET',
-                headers: {}, 
+                headers: {
+                    'Authorization': 'Bearer '+token
+                }, 
                 });
                 const specificStudent = await response.json();
                 setStudent(specificStudent.data);

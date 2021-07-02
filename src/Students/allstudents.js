@@ -17,7 +17,7 @@ import Paper from '@material-ui/core/Paper';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -86,6 +86,7 @@ function AllStudent(){
   const classes = useStyles();
   const [mount, setMount] = useState(true);
   const [students, setStudents] = useState([]);
+  let history = useHistory();
 
   const deleteStudent = async (id) => {
     console.log("Delete the Row");
@@ -109,12 +110,23 @@ function AllStudent(){
         }
   }
 
+  const Logout = () => {
+    localStorage.removeItem('token');
+    if(!localStorage.getItem('token')){
+      history.push("/");
+    }
+  }
+
   useEffect( () => {
     async function getStudentData(){
         try{
+            const token = localStorage.getItem('token');
+            console.log(token);
             let response = await fetch('http://localhost:8080/students', {
                 method: 'GET',
-                headers: {}, 
+                headers: {
+                'Authorization': 'Bearer '+token
+                }, 
                 });
                 const data = await response.json();
                 // console.log(data);
@@ -140,7 +152,8 @@ function AllStudent(){
             <Typography variant="h6" className={classes.title}>
                 STUDENTS
             </Typography>
-            <Button color="inherit"><Link to="/createstudent" className={classes.newStudentButton}>New Student</Link></Button>
+            {/* <Link to="/" className={classes.newStudentButton}>LOGOUT</Link> */}
+            <Button color="inherit" className={classes.newStudentButton} onClick={Logout}>LOGOUT</Button>
          </Toolbar>
         </AppBar>
         <Container maxWidth="xl">

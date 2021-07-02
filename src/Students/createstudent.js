@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -35,8 +35,10 @@ const useStyles = makeStyles((theme: Theme) =>
         marginLeft: 20,
         width: '90%'
     },
-    paperSize:{
+    paperStyle:{
         width: '50%',
+        margin: 50,
+        borderRadius: 20.0
     },
     backButtonColor: {
       margin: 10,
@@ -46,6 +48,10 @@ const useStyles = makeStyles((theme: Theme) =>
       fontFamily: 'Times New Roman, Times, serif',
       textDecoration: 'none'
     },
+    appBarColor: {
+      color: 'black',
+      backgroundColor: '#9999ff'
+    }, 
     buttonStyle: {
       margin: 20,
       color: 'white',
@@ -54,88 +60,60 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: '#000066',
       width: '50%',
       borderRadius: 5.0
-    },
-    appBarColor: {
-      color: 'black',
-      backgroundColor: '#9999ff'
-    }, 
-    paperStyle:{
-      width: '50%',
-      margin: 50,
-      borderRadius: 20.0
-    },
+    }
   }),
 );
 
-function EditStudent(){
+function CreatStudent(){
     const classes = useStyles();
-    let { id } = useParams();
     const [firstname, setFirstName] = useState('');
-    const [lastname, setLastName] = useState(0);
+    const [lastname, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [designation, setDesignation] = useState('');
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
-    const [mount, setMount] = useState(true);
 
-    const getStudent = async () => {
-        console.log(id);
-        try{
-            let response = await fetch('http://localhost:8080/student/' + id, {
-                method: 'GET',
-                headers: {}, 
-                });
-                const specificStudent = await response.json();
-                setFirstName(specificStudent.data.firstname);
-                setLastName(specificStudent.data.lastname);
-                console.log(specificStudent.data.lastname);
-                setDesignation(specificStudent.data.designation);
-                setCity(specificStudent.data.city);
-                setCountry(specificStudent.data.country);
-            } catch (e){
-             console.log('Record not found');
-            }
+    const Create = async () => {
+        console.log(firstname+','+lastname+','+email+','+password+','+designation+','+city+','+country);
+        return fetch('http://localhost:8080/createstudents', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+            body: JSON.stringify({
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+                hashPassword: password,
+                designation: designation,
+                city: city,
+                country: country,
+            })
+        }).then((response) => {
+          if (response.headers.get('content-type').match(/application\/json/)){
+            return response.json();
+          }
+          return response;
+        })
+        .then((json) => {
+          console.log(json);
+          return json;
+        }).catch((error) => {
+          console.error(error);
+        });
     }
-
-    const updateStudent = async () => {
-        console.log(firstname+','+lastname+','+designation+','+city+','+country+','+id);
-        try{
-            let response = await fetch('http://localhost:8080/student/' + id, {
-                method: 'PATCH',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                }, 
-                  body: JSON.stringify({
-                    firstname: firstname,
-                    lastname: lastname,
-                    designation: designation,
-                    city: city,
-                    country: country,
-                  })
-                });
-                const data = response.json();
-                console.log(data);
-        } catch (e){
-            console.log('Record not found');  
-        }
-    }
-
-    useEffect( () => {
-        if (mount) {
-            getStudent();
-        }
-        return () => setMount(false);
-    }, [])
 
     return (
-        <div>
+    <div>
         <AppBar className={classes.appBarColor} position="static">
             <Toolbar>
                 <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                 <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" className={classes.title}>
-                    UPDATE STUDENT
+                    CREATE STUDENT
                 </Typography>
                 <Button color="inherit"><Link to="/" className={classes.backButtonColor}>Back</Link></Button>
             </Toolbar>
@@ -155,6 +133,22 @@ function EditStudent(){
                 inputProps={{ 'aria-label': 'description' }} 
                 onChange={lname => setLastName(lname.target.value)}
                  value={lastname}
+                /><br/>
+
+                <Input 
+                className={classes.inputMargin} 
+                placeholder="Email" 
+                inputProps={{ 'aria-label': 'description' }} 
+                onChange={email => setEmail(email.target.value)}
+                 value={email}
+                /><br/>
+
+                <Input 
+                className={classes.inputMargin} 
+                placeholder="Password" 
+                inputProps={{ 'aria-label': 'description' }} 
+                onChange={password => setPassword(password.target.value)}
+                 value={password}
                 /><br/>
 
                 <Input
@@ -179,12 +173,11 @@ function EditStudent(){
                 value={country}
                 /><br/>
                 <Button 
-                className={classes.buttonStyle} 
-                color="inherit" onClick={updateStudent}>Update</Button>
+                className={classes.buttonStyle} onClick={Create}>Submit</Button>
             </form>
         </Paper>
-        </div>
+    </div>
     );
 }
 
-export default EditStudent;
+export default CreatStudent;
